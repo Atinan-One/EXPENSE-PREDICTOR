@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Expense Tracker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap bar">
+      <div>
+        <h1>Expense Tracker</h1>
+        <p>See where your money goes and what next month will cost.</p>
+      </div>
+      <div class="bar-actions" id="bar-actions" hidden>
+        <a class="btn ghost" href="/api/export">Download CSV</a>
+        <button class="btn ghost" id="clear-btn" type="button">Clear data</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <p id="global-error" class="error" role="alert" hidden></p>
+
+    <!-- Welcome (no data yet) -->
+    <section id="welcome" class="card welcome" hidden>
+      <h2>Get started</h2>
+      <p class="muted">Upload a CSV of your expenses, or try the app with a year of sample data.</p>
+      <div class="start-row">
+        <input type="file" id="csv-file" accept=".csv,text/csv" aria-label="Choose a CSV file">
+        <button class="btn primary" id="upload-btn" type="button">Upload CSV</button>
+        <span class="or">or</span>
+        <button class="btn secondary" id="sample-btn" type="button">Try sample data</button>
+      </div>
+      <p class="muted small">Columns needed: <code>date, description, amount</code> and optionally <code>category</code>.
+        Leave a category blank and the app will guess it from the description.</p>
+    </section>
+
+    <!-- Dashboard -->
+    <div id="dashboard" hidden>
+      <div class="stats">
+        <div class="stat"><div class="lbl">Average per month</div><div class="num" id="s-avg"></div></div>
+        <div class="stat"><div class="lbl" id="s-last-lbl">Last month</div><div class="num" id="s-last"></div></div>
+        <div class="stat accent"><div class="lbl" id="s-fc-lbl">Forecast</div><div class="num" id="s-fc"></div></div>
+        <div class="stat" id="s-cur-box" hidden><div class="lbl" id="s-cur-lbl">So far this month</div><div class="num" id="s-cur"></div></div>
+        <div class="stat"><div class="lbl">Expenses tracked</div><div class="num" id="s-count"></div></div>
+      </div>
+
+      <div id="notes"></div>
+
+      <div class="grid2">
+        <section class="card">
+          <h2>Monthly budget</h2>
+          <label class="inline">Rs
+            <input type="number" id="budget" min="0" step="1000" placeholder="e.g. 80000">
+          </label>
+          <div id="budget-result" class="budget-result" hidden></div>
+        </section>
+        <section class="card">
+          <h2>Heads up</h2>
+          <ul id="alerts" class="alerts"></ul>
+        </section>
+      </div>
+
+      <section class="card">
+        <h2>Monthly spending</h2>
+        <svg id="chart" viewBox="0 0 900 340" role="img" aria-label="Stacked bar chart of monthly spending by category"></svg>
+        <div id="legend" class="legend"></div>
+      </section>
+
+      <div class="grid2">
+        <section class="card">
+          <h2>By category</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Category</th><th class="r">Last full month</th><th class="r col-sofar" hidden>So far</th><th class="r">Forecast</th><th class="r">Change</th></tr></thead>
+              <tbody id="cat-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Add an expense</h2>
+          <form id="add-form" novalidate>
+            <label>Date <input type="date" name="date" required></label>
+            <label>Description <input type="text" name="description" maxlength="100" placeholder="e.g. Uber ride to office" required></label>
+            <label>Amount (Rs) <input type="number" name="amount" min="1" step="any" placeholder="750" required></label>
+            <label>Category
+              <select name="category">
+                <option value="">Auto-detect</option>
+                {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+              </select>
+            </label>
+            <p id="suggestion" class="suggestion" hidden></p>
+            <button class="btn primary full" type="submit" id="add-btn">Add expense</button>
+            <p id="add-msg" class="success" role="status" hidden></p>
+            <p id="add-error" class="error" role="alert" hidden></p>
+          </form>
+        </section>
+      </div>
+
+      <section class="card">
+        <h2>Recent expenses</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Description</th><th>Category</th><th class="r">Amount</th></tr></thead>
+            <tbody id="recent-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="wrap foot">
+    Your data stays on your computer. Python, NumPy, Pandas, scikit-learn, Flask.
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
